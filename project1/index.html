@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+body {
+  font: 10px sans-serif;
+}
+
+.axis text {
+    font-family: sans-serif;
+    font-size: 10px;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.bar {
+  fill: steelblue;
+}
+
+</style>
+<body>
+<script src="//d3js.org/d3.v3.min.js"></script>
+<script>
+var w = 900;
+var h = 450;
+
+var graphX = 100;
+var graphY = 100;
+var graphW = w - graphX * 2;
+var graphH = h - graphY * 2;
+
+var c1 = "rgb(121, 121, 255)";
+var c2 = "rgb(121, 255, 121)";
+var c3 = "rgb(121, 121, 188)";
+
+var c1l = "rgb(180, 180, 255)";
+var c2l = "rgb(180, 255, 180)";
+var c3l = "rgb(180, 180, 220)";
+
+var c=[c1,c2,c3];
+var cl=[c1l,c2l,c3l];
+var word=["Penicilin","Streptomycin","Neomycin"];
+
+var margin = {top: 20, right: 20, bottom: 30, left: 60};
+var width = 1200 - margin.left - margin.right;
+var height = 600 - margin.top - margin.bottom;
+
+var svg;
+var data;
+var xarray = [];
+var mx = 0.5;
+var back = [100,50];
+var circle = [50];
+var linear;
+
+d3.csv("data.csv", function(error, d){
+  if (error) throw error;
+  data = d;
+  init();
+  draw();
+});
+
+function init(){
+  data.forEach(function(d,i){
+    // console.log(d.Bacteria);
+    xarray.push(d.Bacteria);
+  })
+  // console.log(xarray);
+}
+
+function draw(){
+  svg = d3.select("body").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom);
+  linear = d3.scale.linear()
+    .domain([0,900])
+    .range([0,height]);
+  slinear = d3.scale.linear()
+    .domain([0,mx])
+    .range([0,height-220]);
+  lineary = d3.scale.linear()
+    .domain([0,900])
+    .range([height,0]);
+
+  drawRect();
+  drawLegend();
+  drawBar();
+  drawLittleBar();
+}
+
+function drawLegend(){
+  var legend = svg.selectAll("lrect")
+            .data(word)
+            .enter().append("rect")
+            .attr({
+              class : legend,
+              x : width+8,
+              y : 50,
+              height : 10,
+              width : 10,
+              transform : function(d,i){return "translate(0,"+i*15+")";}
+            })
+            .style("fill",function(d,i){
+              return c[i];
+            });
+  var lword = svg.selectAll("ltext")
+                .data(word)
+                .enter().append("text")
+                .attr({
+                  x : width + 20,
+                  y : 60,
+                  height : 10,
+                  width : 10,
+                  transform : function(d,i){return "translate(0,"+i*15+")";}
+                })
+                .text(function(d){return d;});
+}
+
+function drawBar(){
+  var bar = svg.selectAll("g")
+            .data(data)
+            .enter().append("g")
+            .attr("class","bar")
+            .attr("transform",function(d,i){return "translate("+(i*75+20)+",0)";})
+            .selectAll("rect")
+            .data(function(d){
+              temp = [d.Penicilin,d.Streptomycin,d.Neomycin];
+              return temp;})
+            .enter().append("rect")
+            .attr({
+              x : 0,
+              y : function(d){return height-linear(d);},
+              height : function(d){return linear(d);},
+              width : 15,
+              transform : function(d,i){return "translate("+i*20+",0)";}
+            })
+            .style("fill",function(d,i){
+              return c[i];
+              // console.log(d);
+            });
+
+  var number = svg.selectAll("set")
+                  .data(data)
+                  .enter().append("text")
+                  .attr("transform",function(d,i){return "translate("+(i*75+20)+",0)";})
+                  .selectAll("tspan")
+                  .data(function(d){
+                    // console.log(d);
+                    temp = [d.Penicilin,d.Streptomycin,d.Neomycin];
+                    return temp;})
+                  .enter().append("tspan")
+                  .attr({
+                    x : function(d,i){return i*20+7.5;},
+                    y : function(d){return height-linear(d)-1;}
+                    // transform : function(d,i){return "translate("+i*20+",0)";}
+                  })
+                  .text(function(d){return d;})
+                  .style("font-size","8px")
+                  .style("text-anchor","middle")
+                  .style("fill","black");
+
+  var count = svg.selectAll("xtext")
+                .data(xarray)
+                .enter().append("text")
+                .attr({
+                  x : 0,
+                  y : height + 20,
+                  transform : function(d,i){return "translate("+(i*75+20)+",0)";}
+                })
+                .selectAll("tspan")
+                .data(function(d){
+                  temp = d.split(" ");
+                  // console.log(data);
+                  return temp;
+                })
+                .enter().append("tspan")
+                .attr({
+                  x : 0,
+                  y : function(d,i){return height + (i+1)*10;}
+                })
+                .text(function(d){return d;})
+                .style("font-size","8px")
+                .style("fill","black");
+
+}
+
+function drawLittleBar(){
+  var smallbar = svg.selectAll("sg")
+            .data(data)
+            .enter().append("g")
+            .attr("class","bar")
+            .attr("transform",function(d,i){return "translate("+(i*55)+",0)";})
+            .selectAll("rect")
+            .data(function(d){
+              temp = [d.Penicilin,d.Streptomycin,d.Neomycin];
+              return temp;})
+            .enter().append("rect")
+            .attr({
+              x : 300,
+              y : function(d){
+                if(d>mx)
+                  return height - slinear(mx) - 90;
+                return height-slinear(d) - 90;
+              },
+              height : function(d){
+                if(d>mx)
+                  return slinear(mx);
+                return slinear(d);},
+              width : 10,
+              transform : function(d,i){return "translate("+i*15+",0)";}
+            })
+            .style("fill",function(d,i){
+              return c[i];
+            });
+
+    var number = svg.selectAll("sset")
+                  .data(data)
+                  .enter().append("text")
+                  .attr("transform",function(d,i){return "translate("+(i*55)+",0)";})
+                  .selectAll("tspan")
+                  .data(function(d){
+                    temp = [d.Penicilin,d.Streptomycin,d.Neomycin];
+                    return temp;})
+                  .enter().append("tspan")
+                  .attr({
+                    x : function(d,i){return 300 + i*15+5;},
+                    y : function(d){
+                      if(d>mx)
+                        return height-slinear(mx)-91;
+                      return height-slinear(d)-91;
+                    }
+                    // transform : function(d,i){return "translate("+i*20+",0)";}
+                  })
+                  .text(function(d){return d;})
+                  .style("font-size","6px")
+                  .style("text-anchor","middle")
+                  .style("fill","black");
+
+  var count = svg.selectAll("sxtext")
+                .data(xarray)
+                .enter().append("text")
+                .attr({
+                  x : 300,
+                  y : height - 90,
+                  transform : function(d,i){return "translate("+(i*55)+",0)";}
+                })
+                .selectAll("tspan")
+                .data(function(d){
+                  temp = d.split(" ");
+  //                 // console.log(data);
+                  return temp;
+                })
+                .enter().append("tspan")
+                .attr({
+                  x : 300,
+                  y : function(d,i){return height + (i+1)*6 - 90;}
+                })
+                .text(function(d){return d;})
+                .style("font-size","6px")
+                .style("fill","black");
+
+}
+
+function drawRect(){
+
+  var rect = svg.selectAll("back")
+                .data(back)
+                .enter().append("rect")
+                .attr({
+                  x : function(d,i){
+                    if(i==0)return 15;
+                    return 295;
+                  },
+                  y : function(d,i){
+                    if(i==0)return 0;
+                    return height-slinear(mx)-100;
+                  },
+                  height : function(d,i){
+                    if(i==0)return height+30;
+                    return height-190;
+                  },
+                  width : function(d,i){
+                    if(i==0)return 670;
+                    return 490;
+                  }
+                })
+                .style("fill","#D4D4D4");
+
+  var frame = svg.selectAll("frame")
+              .data(circle)
+              .enter().append("rect")
+              .attr({
+                x:295,
+                y:height-slinear(mx)-100,
+                height:height-190,
+                width:880
+              })
+              .style("fill","transparent")
+              .style("stroke","black")
+              // .style("stroke-dasharray", ("3, 3"))
+              // .style("stroke-opacity", 0.9)
+              .style("stroke-width","1px");
+
+}
+</script>
