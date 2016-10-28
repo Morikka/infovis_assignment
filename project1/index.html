@@ -34,16 +34,11 @@ var graphY = 100;
 var graphW = w - graphX * 2;
 var graphH = h - graphY * 2;
 
-var c1 = "rgb(121, 121, 255)";
-var c2 = "rgb(121, 255, 121)";
-var c3 = "rgb(121, 121, 188)";
-
-var c1l = "rgb(180, 180, 255)";
-var c2l = "rgb(180, 255, 180)";
-var c3l = "rgb(180, 180, 220)";
+var c3 = "#99d8c9";
+var c2 = "#41ae76";
+var c1 = "#005824";
 
 var c=[c1,c2,c3];
-var cl=[c1l,c2l,c3l];
 var word=["Penicilin","Streptomycin","Neomycin"];
 
 var margin = {top: 20, right: 20, bottom: 30, left: 60};
@@ -53,7 +48,7 @@ var height = 600 - margin.top - margin.bottom;
 var svg;
 var data;
 var xarray = [];
-var mx = 0.5;
+var mx = 10;
 var back = [100,50];
 var circle = [50];
 var linear;
@@ -267,7 +262,6 @@ function drawLittleBar(){
 }
 
 function drawRect(){
-
   var rect = svg.selectAll("back")
                 .data(back)
                 .enter().append("rect")
@@ -289,7 +283,7 @@ function drawRect(){
                     return 490;
                   }
                 })
-                .style("fill","#D4D4D4");
+                .style("fill","#D8D8D8");
 
   var frame = svg.selectAll("frame")
               .data(circle)
@@ -305,6 +299,27 @@ function drawRect(){
               // .style("stroke-dasharray", ("3, 3"))
               // .style("stroke-opacity", 0.9)
               .style("stroke-width","1px");
+  var title = svg.selectAll("title")
+              .data(back)
+              .enter().append("text")
+              .attr({
+                x : 300,
+                y : function(d,i){
+                  if(i==0)
+                    return 23;
+                  return 115;
+                }
+              })
+              .text(function(d,i){
+                if(i==0)return "the minimum inhibitory concentration (gray is negative)";
+                var sen = "part of the bar chart (less than " + mx +")";
+                return sen;
+              })
+              .style("font-size",function(d,i){
+                if(i==0)
+                  return "26px";
+                return "20px";
+              });
 
 }
 </script>
